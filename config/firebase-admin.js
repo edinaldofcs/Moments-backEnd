@@ -1,0 +1,20 @@
+const admin = require("firebase-admin");
+
+const servicesAccount = {
+  type: process.env.TYPE,
+  project_id: process.env.ID_PROJECT,
+  private_key_id: process.env.PRIVATE_KEY_ID,
+  private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCtRrT2IJjhlku6\n70OWxd0wU1yYHKYaFs4I4cb6DBnfuUAlXx1dfP1rN5dxbiN5AO2ZC5NQ4/f6aDzM\nVT5LnqrEDrUfCGV/jFPxJdf+zwVUVlFJPzlqfQuRUCNx+Z8hQRajMfZW28vVYySM\nOXb3b9GDNBJyYaNnD6IUv1hzxrJuCrhXbvK4PTad9knqHC8tI6N2xSQ7YcS39E3O\nJFK6tFzenkXSRPtw11n01FoVI5ptZt2edOMJyTWAnpiA7/0hDnz29M31cZJHuvfB\n249iiOuYm+uWPNuYjpWGB/OG+vSBT6RXq3/nEPH1KoQ6SRR7bse29CcJt1Ln7TcM\nFntF1YGrAgMBAAECggEAHWAj1KgxEul+fDoM7NYtigBP7c/Jjxm3o0TXjVOY3VdU\nGyHVYiCK++7IQ2gnJl/0Z+JQ/sEvLKoYSJHZBkvnamaN6S1su6NoJbVDOYUSQ7qA\nfFj2HGoHmIKMB8oIYsRcmJ0jRJVtqIbuzsD9PLSdwc8Fo5OO9q1tTnQkBDi2zjXF\n3H4Z98igNd66vTMphNcuBX1bHveWoRWWFv1fI6Fn0YTUFhKaT8Omt9fFLNFL44c5\nu807F1MWCI83BBrboJ6iGvblmfCLR1Wcwh28RhLmVGrkAGZcnMRN9iofXwfv7DVD\nXbyEgmjOgZ3CposeXYr7SIA2KLpgzqD0/6dGbLp7IQKBgQDz8tEnr1x2SwjBXj8l\n8RMwG3Bwwwfg/CPVB4fN2rQFIVsq3SCOqUHsQ8RVBkoBz18UynQeOkk838S6kOkO\nVeMOYELueR5WP6DoHdRDw2zgPZAbp2BDP1IxZyYZBlHYAP2C9sNPMvpHUIgI0zCN\n843FNBUK6XghPjaRcxExxAb7SwKBgQC11htkV6dj4elt9VZMFruatRRVLYUREyub\nhTK42yZuXhkq81RF1NhFh+ZNmfZYzv2PRTqGMdMMvXCFQYPzCKNDsfDpkelU8Squ\n6IHdrzwELrifpLTfJsQTa1e+S+l6agM5TpGeWNZ8sGcTVHAMw/ZrTaV0+XewvEFu\n2WFP6ZY3IQKBgQDxYkMzUYHcS0LOk8NId9LUt1H7QgB5zwRltp3aQ539tZPQRh4B\nC9n/Ps72ktKIF/mtSOa9Qk9VvNWdBeaWGMYjY3zXG2G5VhyRkXKH2sfQ2xnNQ0Et\nSWq7F6XK/UXexpwTCrkXlQmxpy30DYTt8SFHENIBiiMkQbsdEQ7if2WpIQKBgQCM\nlCILOoUMAH0CaLk2DCEwIyy8CXwlzkdZbenf5nXYv+D/Rq3xavNlFgLkHdLJqAV5\n/VCYrO54nADg1NzZSOVIEcqqGQdmhyiznsfABpkEtsY/jgvTtdnDFar5USEJZepm\nJKsJ266/KXYXCKG0DNB29smjHLb/KRwBQggsyu86YQKBgDe6paf3n7sg7Leu42CV\nb8G94rG0ZNQYx5hI5aN5O/L8+xgeZC5Amc5kCsGUEzq4c3bpsZ0l62iaMS+5LD38\n6JzF/LS6qzRVr5i3ammakd9RCcPLvYazb5esv2NEsp9/kcLE7cz95INs/T4X/LbU\nG0XQpEMRNuWjWIWMHSfn2U4r\n-----END PRIVATE KEY-----\n",
+  client_email: process.env.CLIENT_EMAIL,
+  client_id: process.env.CLIENT_ID,
+  auth_uri: process.env.AUTH_URI,
+  token_uri: process.env.TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.AUTH_PROVIDER_X509,
+  client_x509_cert_url: process.env.CLIENT_X509_CERT_URL,
+}
+
+admin.initializeApp({
+  credential: admin.credential.cert(servicesAccount)
+});
+
+module.exports = {admin}
