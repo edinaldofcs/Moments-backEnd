@@ -17,13 +17,29 @@ export interface instantProps {
 }
 
 module.exports = class InstantController {
+
+  static async listAllCollections(req: Request, res: Response) {
+    const admin = require("firebase-admin");
+    const db = admin.firestore();
+    const collections = await db.listCollections();
+    const rooms: string[] = [];
+
+    collections.forEach((collection: any) => {
+      rooms.push(collection["_queryOptions"].collectionId);
+    });
+
+    res.status(200).json({ rooms });
+  }
+
   static async listAll(req: Request, res: Response) {
+    const { collection } = req.params;
+
     try {
-      const instants = await firestore.collection("instant");
+      const instants = await firestore.collection(collection);
       const data = await instants.get();
       const momentArray: instantProps[] = [];
       if (!data) {
-        return res.status(404).send("No instants found");
+        return res.status(404).json({ message: "No instants found" });
       }
 
       data.forEach(
@@ -44,18 +60,19 @@ module.exports = class InstantController {
             author,
             description,
             image,
-            like,
+            like
           );
           momentArray.push(instant);
         }
       );
-      res.send(momentArray);
+      res.status(200).json(momentArray);
     } catch (error) {
-      res.status(400).send(error);
+      res.status(400).json({ message: "Não foi possível obter as mensagens" });
     }
   }
   static async insert(req: Request, res: Response) {
     const user = await checkToken(req);
+    const { collection } = req.params;
 
     if (!user) {
       return res.json({ message: "Usuário inválido" });
@@ -66,7 +83,7 @@ module.exports = class InstantController {
 
     try {
       await firestore
-        .collection("instant")
+        .collection(collection)
         .doc()
         .set({ ...instant });
       return res
@@ -79,7 +96,8 @@ module.exports = class InstantController {
 
   static async updateInstant(req: Request, res: Response) {
     const user = await checkToken(req);
-
+    const { collection } = req.params;  
+    
     if (!user) {
       return res.json({ message: "Usuário inválido" });
     }
@@ -87,16 +105,18 @@ module.exports = class InstantController {
     try {
       const { id } = req.params;
       const data = req.body;
-      const instant = await firestore.collection("instant").doc(id);
+      const instant = await firestore.collection(collection).doc(id);
       await instant.update(data);
       res.status(200).json("Momento Atualizado com sucesso!!");
     } catch (error) {
-      res.status(400).send(error);
+      res.status(400).json(error);
     }
   }
 
   static async addLike(req: Request, res: Response) {
+    
     const user = await checkToken(req);
+    const { collection } = req.params;
 
     if (!user) {
       return res.json({ message: "Usuário inválido" });
@@ -104,7 +124,7 @@ module.exports = class InstantController {
 
     try {
       const { id } = req.params;
-      const instant = await firestore.collection("instant").doc(id);
+      const instant = await firestore.collection(collection).doc(id);
       const updateInstant = await instant.get();
       const likes = Number(updateInstant.data().like) + 1;
       await instant.update({
@@ -118,6 +138,7 @@ module.exports = class InstantController {
 
   static async deleteInstant(req: Request, res: Response) {
     const user = await checkToken(req);
+    const { collection } = req.params;
 
     if (!user) {
       return res.json({ message: "Usuário inválido" });
@@ -125,9 +146,13 @@ module.exports = class InstantController {
 
     try {
       const { id } = req.params;
-      const instant = await firestore.collection("instant").doc(id);
+      const instant = await firestore.collection(collection).doc(id);
+      const myDoc = await instant.get();
+      if (!myDoc.exists) {
+        return res.status(404).json({ message: "Mensagem não encontrada" });
+      }
       await instant.delete();
-      res.send("Momento excluido com sucesso");
+      res.status(200).json({ message: "Momento excluido com sucesso" });
     } catch (error) {
       res.status(400).send(error);
     }
