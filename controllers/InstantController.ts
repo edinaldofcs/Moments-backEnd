@@ -193,4 +193,4 @@ export class InstantController {
         .json({ erro: "Não foi possível excluir o seu post :(" });
     }
   }
-};
+}
