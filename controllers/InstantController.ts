@@ -4,7 +4,6 @@ import { Request, Response } from "express";
 import { checkToken, User } from "../helper/checkToken";
 import { Instant } from "../models/Instant";
 
-
 const firestore = firebase.firestore();
 
 export interface instantProps {
@@ -80,7 +79,7 @@ export class InstantController {
     const user: User | null | undefined = await checkToken(req);
 
     if (!user) {
-      return res.status(403).json({ erro: "Acesso proibido!" });
+      return res.status(403).json({ erro: "Acesso restrito!" });
     }
 
     const { collection } = req.params;
@@ -118,7 +117,7 @@ export class InstantController {
     const { collection } = req.params;
 
     if (!user) {
-      return res.status(403).json({ erro: "Acesso proibido!" });
+      return res.status(403).json({ erro: "Acesso restrito!" });
     }
 
     const { id } = req.params;
@@ -151,7 +150,7 @@ export class InstantController {
     const { collection } = req.params;
 
     if (!user) {
-      return res.status(403).json({ erro: "Acesso proibido!" });
+      return res.status(403).json({ erro: "Acesso restrito!" });
     }
 
     try {
@@ -175,7 +174,7 @@ export class InstantController {
     const { collection } = req.params;
 
     if (!user) {
-      return res.status(403).json({ erro: "Acesso proibido!" });
+      return res.status(403).json({ erro: "Acesso restrito!" });
     }
 
     const { id } = req.params;
@@ -194,4 +193,4 @@ export class InstantController {
         .json({ erro: "Não foi possível excluir o seu post :(" });
     }
   }
-};
+}

@@ -1,5 +1,5 @@
 import { InstantController } from "../controllers/InstantController";
-import express from 'express'
+import express from "express";
 
 const router = express.Router();
 
@@ -10,6 +10,6 @@ router.delete("/delete/:id/:collection", InstantController.deleteInstant);
 router.get("/all/:collection", InstantController.listAll);
 router.get("/rooms", InstantController.listAllCollections);
 
-module.exports = {
+export default {
   routes: router,
 };
