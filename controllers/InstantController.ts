@@ -1,10 +1,10 @@
 "use strict";
-
 import { db as firebase } from "../db/db";
 import { Request, Response } from "express";
+import { checkToken, User } from "../helper/checkToken";
+import { Instant } from "../models/Instant";
 
-const checkToken = require("../helper/checkToken");
-const Instant = require("../models/Instant");
+
 const firestore = firebase.firestore();
 
 export interface instantProps {
@@ -16,8 +16,7 @@ export interface instantProps {
   like: number;
 }
 
-module.exports = class InstantController {
-
+export class InstantController {
   static async listAllCollections(req: Request, res: Response) {
     const admin = require("firebase-admin");
     const db = admin.firestore();
@@ -28,7 +27,10 @@ module.exports = class InstantController {
       rooms.push(collection["_queryOptions"].collectionId);
     });
 
-    res.status(200).json({ rooms });
+    if (rooms.length == 0) {
+      return res.status(404).json({ erro: "Nenhuma Sala encontrada" });
+    }
+    return res.status(200).json({ rooms });
   }
 
   static async listAll(req: Request, res: Response) {
@@ -38,8 +40,9 @@ module.exports = class InstantController {
       const instants = await firestore.collection(collection);
       const data = await instants.get();
       const momentArray: instantProps[] = [];
-      if (!data) {
-        return res.status(404).json({ message: "No instants found" });
+
+      if (data.empty) {
+        return res.status(404).json({ erro: "Nenhuma Sala encontrada" });
       }
 
       data.forEach(
@@ -65,20 +68,34 @@ module.exports = class InstantController {
           momentArray.push(instant);
         }
       );
-      res.status(200).json(momentArray);
+      return res.status(200).json(momentArray);
     } catch (error) {
-      res.status(400).json({ message: "Não foi possível obter as mensagens" });
+      return res.status(504).json({
+        erro: "Não foi possível obter as mensagens. Tente novamente dentro de alguns minutos!",
+      });
     }
   }
+
   static async insert(req: Request, res: Response) {
-    const user = await checkToken(req);
-    const { collection } = req.params;
+    const user: User | null | undefined = await checkToken(req);
 
     if (!user) {
-      return res.json({ message: "Usuário inválido" });
+      return res.status(403).json({ erro: "Acesso proibido!" });
     }
 
+    const { collection } = req.params;
     const { title, image, description } = req.body;
+
+    const erro: string[] = [];
+    if (!title || title === "") erro.push("O titulo não pode estar em branco");
+    if (!image || image === "") erro.push("A imagem não pode estar em branco");
+    if (!description || description === "")
+      erro.push("A descrição não pode estar em branco");
+
+    if (erro.length > 0) {
+      return res.status(422).json({ erro: erro });
+    }
+
     const instant = new Instant("", title, user.name, description, image, 0);
 
     try {
@@ -90,36 +107,51 @@ module.exports = class InstantController {
         .status(200)
         .json({ message: "Momento registrado com sucesso!" });
     } catch (error) {
-      res.status(201).json({ message: "erro " + error });
+      return res
+        .status(500)
+        .json({ erro: "Não foi possível registrar Seu post :(" });
     }
   }
 
   static async updateInstant(req: Request, res: Response) {
-    const user = await checkToken(req);
-    const { collection } = req.params;  
-    
+    const user: User | null | undefined = await checkToken(req);
+    const { collection } = req.params;
+
     if (!user) {
-      return res.json({ message: "Usuário inválido" });
+      return res.status(403).json({ erro: "Acesso proibido!" });
+    }
+
+    const { id } = req.params;
+    const { title, image, description } = req.body;
+    const erro: string[] = [];
+    if (title === "") erro.push("O titulo não pode estar em branco");
+    if (image === "") erro.push("A imagem não pode estar em branco");
+    if (description === "") erro.push("A descrição não pode estar em branco");
+
+    if (erro.length > 0) {
+      return res.status(422).json({ erro: erro });
     }
 
     try {
-      const { id } = req.params;
-      const data = req.body;
+      const data = { title, image, description };
       const instant = await firestore.collection(collection).doc(id);
       await instant.update(data);
-      res.status(200).json("Momento Atualizado com sucesso!!");
+      return res
+        .status(200)
+        .json({ message: "Momento Atualizado com sucesso!!" });
     } catch (error) {
-      res.status(400).json(error);
+      return res
+        .status(500)
+        .json({ erro: "Não foi possível atualizar seu post :(" });
     }
   }
 
   static async addLike(req: Request, res: Response) {
-    
-    const user = await checkToken(req);
+    const user: User | null | undefined = await checkToken(req);
     const { collection } = req.params;
 
     if (!user) {
-      return res.json({ message: "Usuário inválido" });
+      return res.status(403).json({ erro: "Acesso proibido!" });
     }
 
     try {
@@ -130,31 +162,36 @@ module.exports = class InstantController {
       await instant.update({
         like: likes,
       });
-      res.status(200).json("Like Adicionado");
+      return res.status(200).json({ message: "Você curtiu este post!" });
     } catch (error) {
-      res.status(400).send(error);
+      return res
+        .status(500)
+        .json({ erro: "Não foi possível deixar o seu like :(" });
     }
   }
 
   static async deleteInstant(req: Request, res: Response) {
-    const user = await checkToken(req);
+    const user: User | null | undefined = await checkToken(req);
     const { collection } = req.params;
 
     if (!user) {
-      return res.json({ message: "Usuário inválido" });
+      return res.status(403).json({ erro: "Acesso proibido!" });
+    }
+
+    const { id } = req.params;
+    const instant = await firestore.collection(collection).doc(id);
+    const myDoc = await instant.get();
+    if (!myDoc.exists) {
+      return res.status(404).json({ erro: "Post não encontrado" });
     }
 
     try {
-      const { id } = req.params;
-      const instant = await firestore.collection(collection).doc(id);
-      const myDoc = await instant.get();
-      if (!myDoc.exists) {
-        return res.status(404).json({ message: "Mensagem não encontrada" });
-      }
       await instant.delete();
-      res.status(200).json({ message: "Momento excluido com sucesso" });
+      return res.status(200).json({ message: "Momento excluido com sucesso" });
     } catch (error) {
-      res.status(400).send(error);
+      return res
+        .status(500)
+        .json({ erro: "Não foi possível excluir o seu post :(" });
     }
   }
 };

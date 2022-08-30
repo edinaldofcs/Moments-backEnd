@@ -1,5 +1,6 @@
-const express = require("express");
-const InstantController = require("../controllers/InstantController");
+import { InstantController } from "../controllers/InstantController";
+import express from 'express'
+
 const router = express.Router();
 
 router.post("/insert/:collection", InstantController.insert);
