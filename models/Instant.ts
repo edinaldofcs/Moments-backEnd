@@ -1,6 +1,6 @@
 import { instantProps } from "@controller/InstantController";
 
-class Instant {
+export class Instant {
   id: string | "";
   title: string;
   author: string;
@@ -25,4 +25,3 @@ class Instant {
   }
 }
 
-module.exports = Instant;
