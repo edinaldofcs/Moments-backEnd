@@ -1,4 +1,4 @@
-import { InstantController } from "../controllers/InstantController";
+import { InstantController } from "@controller/InstantController";
 import express from "express";
 
 const router = express.Router();

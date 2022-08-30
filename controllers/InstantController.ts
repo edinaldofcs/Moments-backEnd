@@ -1,8 +1,8 @@
 "use strict";
-import { db as firebase } from "../db/db";
+import { db as firebase } from "@db/db";
 import { Request, Response } from "express";
-import { checkToken, User } from "../helper/checkToken";
-import { Instant } from "../models/Instant";
+import { checkToken, User } from "@helper/checkToken";
+import { Instant } from "@model/Instant";
 
 const firestore = firebase.firestore();
 
