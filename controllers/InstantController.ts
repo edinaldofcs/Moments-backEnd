@@ -5,7 +5,6 @@ import { checkToken, User } from "@helper/checkToken";
 import { Instant } from "@model/Instant";
 
 const firestore = firebase.firestore();
-
 export interface instantProps {
   id: string | "";
   title: string;
